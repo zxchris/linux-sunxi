@@ -37,6 +37,12 @@ config ARM
 	  Europe.  There is an ARM Linux project with a web page at
 	  <http://www.arm.linux.org.uk/>.
 
+config CHIP_ID
+        int
+        default 1120 if ARCH_SUN3I
+        default 1123 if ARCH_SUN4I
+	default 1125 if ARCH_SUN5I
+
 config HAVE_PWM
 	bool
 
@@ -596,6 +602,39 @@ config ARCH_TEGRA
 	help
 	  This enables support for NVIDIA Tegra based systems (Tegra APX,
 	  Tegra 6xx and Tegra 2 series).
+
+config ARCH_SUN4I
+	bool "AllWinner SUN4I Platform"
+	select CPU_V7
+	select ARM_AMBA
+	select HAVE_CLK
+	select CLKDEV_LOOKUP
+	select CLKSRC_MMIO
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select ARM_L1_CACHE_SHIFT_6
+	help
+	  This enables support for Allwinner Technology Co., Ltd A10 SoC based systems
+
+config ARCH_SUN5I
+        bool "AllWinner SUN5I Platform"
+        select CPU_V7
+        select ARM_AMBA
+        select HAVE_CLK
+        select CLKDEV_LOOKUP
+        select CLKSRC_MMIO
+        select GENERIC_CLOCKEVENTS
+        select ARCH_HAS_CPUFREQ
+        select ARM_L1_CACHE_SHIFT_6
+        help
+          This enables support for Allwinner Technology Co., Ltd A12/A13 SoC based systems
+
+#if ARCH_SUN4I
+#source "arch/arm/mach-sun4i/Kconfig"
+#endif
+if ARCH_SUN5I
+source "arch/arm/mach-sun5i/Kconfig"
+endif
 
 config ARCH_PNX4008
 	bool "Philips Nexperia PNX4008 Mobile"
