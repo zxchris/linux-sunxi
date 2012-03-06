@@ -84,7 +84,7 @@
 
 #define RTC_NAME	"pcf8563"
 
-#define F25_ALARM
+//#define F25_ALARM
 #define RTC_ALARM_DEBUG
 
 static struct i2c_driver pcf8563_driver;
@@ -767,7 +767,6 @@ static int pcf8563_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	if (ret < 0) {
 		goto out;
 	}	
-	tm->tm_min = tm->tm_min + 1;
 	/*adjust the alarm time*/
 	if (tm->tm_sec >= 30) {	
 		tm->tm_min = tm->tm_min + 1;
