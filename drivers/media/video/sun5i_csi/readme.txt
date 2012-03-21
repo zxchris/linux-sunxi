@@ -1,10 +1,10 @@
 ===========================================
 
-Version: V1_11
+Version: V1_13
 
 Author:  raymonxiu
 
-Date:     2012-2-28 19:28:42
+Date:     2012-3-12 10:14:50
 
 Description:
 
@@ -23,6 +23,20 @@ insmod sun4i_csiX.ko ccm="mt9d112" i2c_addr=0x78
 insmod sun4i_csiX.ko ccm="ov5640" i2c_addr=0x78
 insmod sun4i_csiX.ko ccm="gc2015" i2c_addr=0x60
 insmod sun4i_csiX.ko ccm="ov2643" i2c_addr=0x60
+insmod sun4i_csiX.ko ccm="gc0329" i2c_addr=0x62
+
+V1_13
+CSI: Fix bugs and add new module gc0309 support 
+1) Fix gc0308 AWB recovery
+2) Fix ov2643 UXGA flicker
+3) Add new module gc0309
+
+V1_12
+CSI: Optimizing for CTS test and fix bug
+1) Optimizing gc0308 and gt2005 for CTS test
+2) Fix clock alternating bug
+3) Add gc0329 module
+4) Modify all msleep to mdelay
 
 V1_11
 CSI: Modify clock gating and axp_gpio_get_io bug 

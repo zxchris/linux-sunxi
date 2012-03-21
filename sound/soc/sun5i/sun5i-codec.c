@@ -340,6 +340,8 @@ static  int codec_init(void)
 
 static int codec_play_open(struct snd_pcm_substream *substream)
 {	
+	codec_wr_control(SUN5I_DAC_ACTL, 0x1, PA_MUTE, 0x0);
+	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");
 	codec_wr_control(SUN5I_DAC_DPC ,  0x1, DAC_EN, 0x1);  
 	codec_wr_control(SUN5I_DAC_FIFOC ,0x1, DAC_FIFO_FLUSH, 0x1);
 	//set TX FIFO send drq level
@@ -384,8 +386,7 @@ static int codec_capture_open(void)
 }
 
 static int codec_play_start(void)
-{
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");
+{	
 	//flush TX FIFO
 	codec_wr_control(SUN5I_DAC_FIFOC ,0x1, DAC_FIFO_FLUSH, 0x1);
 	//enable dac drq
@@ -396,7 +397,6 @@ static int codec_play_start(void)
 static int codec_play_stop(void)
 {	
 	//pa mute
-	gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");
 	codec_wr_control(SUN5I_DAC_ACTL, 0x1, PA_MUTE, 0x0);
 	mdelay(5);
 	//disable dac drq
@@ -411,7 +411,6 @@ static int codec_play_stop(void)
 static int codec_capture_start(void)
 {
 	//enable adc drq
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");
 	codec_wr_control(SUN5I_ADC_FIFOC ,0x1, ADC_DRQ, 0x1);
 	return 0;
 }
@@ -1228,7 +1227,6 @@ static void codec_resume_events(struct work_struct *work)
 	codec_wr_control(SUN5I_DAC_ACTL, 0x1, 	DACPAS, 0x1);	
     msleep(50);
 	printk("====pa turn on===\n");	
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");		
 }
 
 static int __init sun5i_codec_probe(struct platform_device *pdev)
@@ -1358,7 +1356,7 @@ static int __init sun5i_codec_probe(struct platform_device *pdev)
  */
 static int snd_sun5i_codec_suspend(struct platform_device *pdev,pm_message_t state)
 {
-	printk("[audio codec]:suspend start5000\n");
+	printk("[audio codec]:suspend start\n");
 	gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");
 	mdelay(50);
 	codec_wr_control(SUN5I_ADC_ACTL, 0x1, PA_ENABLE, 0x0);
