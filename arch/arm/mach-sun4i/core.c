@@ -359,6 +359,7 @@ static struct irqaction sw_timer_irq = {
 	.irq = SW_INT_IRQNO_TIMER0,
 };
 
+extern int aw_clksrc_init(void);
 
 static void __init sw_timer_init(void)
 {
@@ -393,6 +394,8 @@ static void __init sw_timer_init(void)
 	timer0_clockevent.cpumask = cpumask_of(0);
 	timer0_clockevent.irq = sw_timer_irq.irq;
 	clockevents_register_device(&timer0_clockevent);
+	printk("%s,line:%d\n", __func__, __LINE__);
+	aw_clksrc_init();
 }
 
 struct sys_timer sw_sys_timer = {
@@ -420,6 +423,18 @@ enum sw_ic_ver sw_get_ic_ver(void)
 	return MAGIC_VER_C;
 }
 EXPORT_SYMBOL(sw_get_ic_ver);
+
+int sw_get_chip_id(struct sw_chip_id *chip_id)
+{
+    chip_id->sid_rkey0 = readl(SW_VA_SID_IO_BASE);
+    chip_id->sid_rkey1 = readl(SW_VA_SID_IO_BASE+0x04);
+    chip_id->sid_rkey2 = readl(SW_VA_SID_IO_BASE+0x08);
+    chip_id->sid_rkey3 = readl(SW_VA_SID_IO_BASE+0x0C);
+
+    return 0;
+}
+EXPORT_SYMBOL(sw_get_chip_id);
+
 /**
  * Arch Required Implementations
  *
