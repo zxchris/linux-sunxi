@@ -1,8 +1,8 @@
 /*
  * sound\soc\sun5i\hdmiaudio\sun5i-sndhdmi.c
  * (C) Copyright 2007-2011
- * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
- * chenpailin <chenpailin@allwinnertech.com>
+ * Reuuimlla Technology Co., Ltd. <www.reuuimllatech.com>
+ * chenpailin <chenpailin@Reuuimllatech.com>
  *
  * some simple description for this code
  *
@@ -254,7 +254,7 @@ static struct snd_soc_dai_link sun5i_sndhdmi_dai_link = {
 };
 
 static struct snd_soc_card snd_soc_sun5i_sndhdmi = {
-	.name 		= "sun5i-sndhdmi",
+	.name 		= "sndhdmi",
 	.dai_link 	= &sun5i_sndhdmi_dai_link,
 	.num_links 	= 1,
 };

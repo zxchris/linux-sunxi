@@ -56,6 +56,7 @@ build_kernel()
 		cp arch/arm/configs/a13_nuclear_defconfig .config
 	fi
 
+	build_standby
 	make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} -j8 uImage modules
 
 	update_kern_ver

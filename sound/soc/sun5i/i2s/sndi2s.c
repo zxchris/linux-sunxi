@@ -1,8 +1,8 @@
 /*
  * sound\soc\sun5i\i2s\sndi2s.c
  * (C) Copyright 2007-2011
- * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
- * chenpailin <chenpailin@allwinnertech.com>
+ * Reuuimlla Technology Co., Ltd. <www.reuuimllatech.com>
+ * chenpailin <chenpailin@Reuuimllatech.com>
  *
  * some simple description for this code
  *
@@ -102,6 +102,13 @@ struct snd_soc_dai_driver sndi2s_dai = {
 	/* playback capabilities */
 	.playback = {
 		.stream_name = "Playback",
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = sndi2s_RATES,
+		.formats = sndi2s_FORMATS,
+	},
+	.capture = {
+		.stream_name = "Capture",
 		.channels_min = 1,
 		.channels_max = 2,
 		.rates = sndi2s_RATES,
