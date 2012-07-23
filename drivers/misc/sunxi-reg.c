@@ -1,10 +1,10 @@
 /* driver/misc/sunxi-reg.c
  *
- *  Copyright (C) 2011 Allwinner Technology Co.Ltd
- *  Tom Cubie <tangliang@allwinnertech.com>
- *  update by panlong <panlong@allwinnertech.com> , 2012-4-19 15:39
+ *  Copyright (C) 2011 Reuuimlla Technology Co.Ltd
+ *  Tom Cubie <tangliang@reuuimllatech.com>
+ *  update by panlong <panlong@reuuimllatech.com> , 2012-4-19 15:39
  *
- *  www.allwinnertech.com
+ *  www.reuuimllatech.com
  *
  *  User access to the registers driver.
  *
@@ -56,24 +56,28 @@ static ssize_t sunxi_reg_value_show(struct device *dev,
 	unsigned long tmp_buff[512];
 	if((global_address >= 0xf0000000) && (global_address <= 0xffffffff)){
 		read_reg(global_address,global_size,tmp_buff);
-		len += sprintf(buf+len,"address\t\t00\t\t04\t\t08\t\t0c\n");
-		for(i=0;i<global_size;i++){
-			if((i+3) < global_size){
-				len += sprintf(buf+len, "0x%.8lx:\t%.8lx\t%.8lx\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1],tmp_buff[i+2],tmp_buff[i+3]);
-				i+=3;
-			}else{
-				switch(global_size - i){
-					case 1:{
-						len += sprintf(buf+len,"0x%.8lx:\t%.8lx\n",global_address+i*4,tmp_buff[i]);
-						return  len;
-					}
-					case 2:{
-						len += sprintf(buf+len,"0x%.8lx:\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1]);
-						return  len;
-					}
-					case 3:{
-						len += sprintf(buf+len,"0x%.8lx:\t%.8lx\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1],tmp_buff[i+2]);
-						return  len;
+		if(global_size == 1){
+			return sprintf(buf,"0x%lx",tmp_buff[0]);
+		}else{
+			len += sprintf(buf+len,"address\t\t00\t\t04\t\t08\t\t0c\n");
+			for(i=0;i<global_size;i++){
+				if((i+3) < global_size){
+					len += sprintf(buf+len, "0x%.8lx:\t%.8lx\t%.8lx\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1],tmp_buff[i+2],tmp_buff[i+3]);
+					i+=3;
+				}else{
+					switch(global_size - i){
+						case 1:{
+							len += sprintf(buf+len,"0x%.8lx:\t%.8lx\n",global_address+i*4,tmp_buff[i]);
+							return  len;
+						}
+						case 2:{
+							len += sprintf(buf+len,"0x%.8lx:\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1]);
+							return  len;
+						}
+						case 3:{
+							len += sprintf(buf+len,"0x%.8lx:\t%.8lx\t%.8lx\t%.8lx\n",global_address+i*4,tmp_buff[i],tmp_buff[i+1],tmp_buff[i+2]);
+							return  len;
+						}
 					}
 				}
 			}

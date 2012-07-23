@@ -36,7 +36,7 @@
 #include <mach/system.h>
 
 #define SCRIPT_AUDIO_OK (0)
-static int gpio_pa_shutdown = 0;
+static int capture_used = 0;
 struct clk *codec_apbclk,*codec_pll2clk,*codec_moduleclk;
 
 static volatile unsigned int capture_dmasrc = 0;
@@ -410,7 +410,6 @@ static int codec_capture_open(void)
 
 static int codec_play_start(void)
 {
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");
 	//flush TX FIFO
 	codec_wr_control(SUN4I_DAC_FIFOC ,0x1, DAC_FIFO_FLUSH, 0x1);
 	//enable dac drq
@@ -419,9 +418,7 @@ static int codec_play_start(void)
 }
 
 static int codec_play_stop(void)
-{	
-	//pa mute
-	gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");
+{
 	codec_wr_control(SUN4I_DAC_ACTL, 0x1, PA_MUTE, 0x0);
 	mdelay(5);
 	//disable dac drq
@@ -438,7 +435,6 @@ static int codec_play_stop(void)
 static int codec_capture_start(void)
 {
 	//enable adc drq
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");
 	codec_wr_control(SUN4I_ADC_FIFOC ,0x1, ADC_DRQ, 0x1);
 	return 0;
 }
@@ -785,7 +781,7 @@ static void sun4i_pcm_enqueue(struct snd_pcm_substream *substream)
 					play_pos = play_prtd->dma_start;
 			}else{
 				break;
-			}	  
+			}
 		}
 		play_prtd->dma_pos = play_pos;	
 	}else{
@@ -843,7 +839,7 @@ static void sun4i_audio_play_buffdone(struct sw_dma_chan *channel,
 
 	if (result == SW_RES_ABORT || result == SW_RES_ERR)
 		return;
-		
+
 	play_prtd = substream->runtime->private_data;
 	if (substream){				
 		snd_pcm_period_elapsed(substream);
@@ -915,7 +911,7 @@ static int sun4i_codec_pcm_hw_params(struct snd_pcm_substream *substream, struct
 			play_prtd->dma_period = params_period_bytes(params);
 			play_prtd->dma_start = play_runtime->dma_addr;	
 
-			play_dmasrc = play_prtd->dma_start;	 
+			play_dmasrc = play_prtd->dma_start;
 			play_prtd->dma_pos = play_prtd->dma_start;
 			play_prtd->dma_end = play_prtd->dma_start + play_totbytes;
 			
@@ -1453,12 +1449,21 @@ static int __init snd_card_sun4i_codec_pcm(struct sun4i_codec *sun4i_codec, int 
 	snd_pcm_lib_preallocate_pages_for_all(pcm, SNDRV_DMA_TYPE_DEV, 
 					      snd_dma_isa_data(),
 					      32*1024, 32*1024);
+
+	err = script_parser_fetch("audio_para","capture_used", &capture_used, sizeof(int));
+	if (err) {
+		return -1;
+        printk("[audiocodec]capture using configuration failed\n");
+    }
+
 	/*
 	*	设置PCM操作，第1个参数是snd_pcm的指针，第2 个参数是SNDRV_PCM_STREAM_PLAYBACK
 	*	或SNDRV_ PCM_STREAM_CAPTURE，而第3 个参数是PCM 操作结构体snd_pcm_ops
 	*/
 	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_PLAYBACK, &sun4i_pcm_playback_ops);
-	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE, &sun4i_pcm_capture_ops);
+	if (capture_used) {
+		snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE, &sun4i_pcm_capture_ops);
+	}
 	pcm->private_data = sun4i_codec;//置pcm->private_data为芯片特定数据
 	pcm->info_flags = 0;
 	strcpy(pcm->name, "sun4i PCM");
@@ -1474,8 +1479,7 @@ void snd_sun4i_codec_free(struct snd_card *card)
 
 static void codec_resume_events(struct work_struct *work)
 {
-	printk("%s,%d\n",__func__,__LINE__);
-	//codec_wr_control(SUN4I_DAC_DPC ,  0x1, DAC_EN, 0x1);
+	printk("%s,%d\n",__func__,__LINE__);	
 	msleep(20);
 	//enable PA
 	codec_wr_control(SUN4I_ADC_ACTL, 0x1, PA_ENABLE, 0x1);
@@ -1483,11 +1487,14 @@ static void codec_resume_events(struct work_struct *work)
     //enable dac analog
 	codec_wr_control(SUN4I_DAC_ACTL, 0x1, 	DACAEN_L, 0x1);
 	codec_wr_control(SUN4I_DAC_ACTL, 0x1, 	DACAEN_R, 0x1);
-		
+	//enable mic
+	codec_wr_control(SUN4I_ADC_ACTL, 0x1, MIC1_EN, 0x1);	
+
+	//enable VMIC
+	codec_wr_control(SUN4I_ADC_ACTL, 0x1, VMIC_EN, 0x1);
 	codec_wr_control(SUN4I_DAC_ACTL, 0x1, 	DACPAS, 0x1);	
     msleep(50);
-	printk("====pa turn on===\n");	
-	gpio_write_one_pin_value(gpio_pa_shutdown, 1, "audio_pa_ctrl");		
+	printk("====pa turn on===\n");
 }
 
 static int __init sun4i_codec_probe(struct platform_device *pdev)
@@ -1499,7 +1506,7 @@ static int __init sun4i_codec_probe(struct platform_device *pdev)
 	struct codec_board_info  *db;    
     printk("enter sun4i Audio codec!!!\n"); 
 	/* register the soundcard */
-	ret = snd_card_create(0, "sun4i-codec", THIS_MODULE, sizeof(struct sun4i_codec), 
+	ret = snd_card_create(SNDRV_DEFAULT_IDX1, SNDRV_DEFAULT_STR1, THIS_MODULE, sizeof(struct sun4i_codec),
 			      &card);
 	if (ret != 0) {
 		return -ENOMEM;
@@ -1510,26 +1517,24 @@ static int __init sun4i_codec_probe(struct platform_device *pdev)
 	card->private_free = snd_sun4i_codec_free;//card私有数据释放
 	chip->card = card;
 	chip->samplerate = AUDIO_RATE_DEFAULT;
-
 	/* 
 	*	mixer,注册control(mixer)接口
 	*	创建一个control至少要实现snd_kcontrol_new中的info(),get()和put()这三个成员函数
 	*/
 	if ((err = snd_chip_codec_mixer_new(card)))
 		goto nodev;
-
 	/* 
 	*	PCM,录音放音相关，注册PCM接口
 	*/
 	if ((err = snd_card_sun4i_codec_pcm(chip, 0)) < 0)
 	    goto nodev;
-        
+
 	strcpy(card->driver, "sun4i-CODEC");
-	strcpy(card->shortname, "sun4i-CODEC");
+	strcpy(card->shortname, "audiocodec");
 	sprintf(card->longname, "sun4i-CODEC  Audio Codec");
-        
+
 	snd_card_set_dev(card, &pdev->dev);
-	
+
 	//注册card
 	if ((err = snd_card_register(card)) == 0) {
 		printk( KERN_INFO "sun4i audio support initialized\n" );
@@ -1540,7 +1545,7 @@ static int __init sun4i_codec_probe(struct platform_device *pdev)
 
 	db = kzalloc(sizeof(*db), GFP_KERNEL);
 	if (!db)
-		return -ENOMEM; 
+		return -ENOMEM;
   	/* codec_apbclk */
 	codec_apbclk = clk_get(NULL,"apb_audio_codec");
 	if (-1 == clk_enable(codec_apbclk)) {
@@ -1585,30 +1590,24 @@ static int __init sun4i_codec_probe(struct platform_device *pdev)
 		 goto out;
 	 }
 
-	 kfree(db);
-	 gpio_pa_shutdown = gpio_request_ex("audio_para", "audio_pa_ctrl");
-	 if(!gpio_pa_shutdown) {
-		printk("audio codec_wakeup request gpio fail!\n");
-		goto out;
-	}
-	 gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");	
-	 codec_init(); 
-	 gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");	 
-	 resume_work_queue = create_singlethread_workqueue("codec_resume");
-	 if (resume_work_queue == NULL) {
-        printk("[su4i-codec] try to create workqueue for codec failed!\n");
+	kfree(db);
+	codec_init();
+	resume_work_queue = create_singlethread_workqueue("codec_resume");
+	if (resume_work_queue == NULL) {
+		printk("[su4i-codec] try to create workqueue for codec failed!\n");
 		ret = -ENOMEM;
 		goto err_resume_work_queue;
 	}
-	 printk("sun4i Audio codec successfully loaded..\n");
-	 return 0;
-     err_resume_work_queue:
-	 out:
-		 dev_err(db->dev, "not found (%d).\n", ret);
+
+	printk("sun4i Audio codec successfully loaded..\n");
+	return 0;
+	err_resume_work_queue:
+	out:
+	 dev_err(db->dev, "not found (%d).\n", ret);
 	
-	 nodev:
-		snd_card_free(card);
-		return err;
+	nodev:
+	snd_card_free(card);
+	return err;
 }
 
 /*	suspend state,先disable左右声道，然后静音，再disable pa(放大器)，
@@ -1618,8 +1617,6 @@ static int __init sun4i_codec_probe(struct platform_device *pdev)
 static int snd_sun4i_codec_suspend(struct platform_device *pdev,pm_message_t state)
 {
 	printk("[audio codec]:suspend start5000\n");
-	gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");
-	mdelay(50);
 	codec_wr_control(SUN4I_ADC_ACTL, 0x1, PA_ENABLE, 0x0);
 	mdelay(100);
 	//pa mute
@@ -1632,12 +1629,15 @@ static int snd_sun4i_codec_suspend(struct platform_device *pdev,pm_message_t sta
 	//disable dac to pa
 	codec_wr_control(SUN4I_DAC_ACTL, 0x1, 	DACPAS, 0x0);	
 	codec_wr_control(SUN4I_DAC_DPC ,  0x1, DAC_EN, 0x0);  	 
-	 
+	//disable mic
+	codec_wr_control(SUN4I_ADC_ACTL, 0x1, MIC1_EN, 0x0);	
+
+	//disable VMIC
+	codec_wr_control(SUN4I_ADC_ACTL, 0x1, VMIC_EN, 0x0);
 	clk_disable(codec_moduleclk);
 	printk("[audio codec]:suspend end\n");
 	return 0;	
 }
-
 
 /*	resume state,先unmute，
  *	再enable DAC，enable L/R DAC,enable PA，
@@ -1671,8 +1671,6 @@ static int __devexit sun4i_codec_remove(struct platform_device *devptr)
 
 static void sun4i_codec_shutdown(struct platform_device *devptr)
 {	
-	gpio_write_one_pin_value(gpio_pa_shutdown, 0, "audio_pa_ctrl");
-	mdelay(50);
 	codec_wr_control(SUN4I_ADC_ACTL, 0x1, PA_ENABLE, 0x0);
 	mdelay(100);
 	//pa mute
@@ -1719,15 +1717,24 @@ static struct platform_driver sun4i_codec_driver = {
 	},
 };
 
+static int audio_used = 0;
 static int __init sun4i_codec_init(void)
 {
 	int err = 0;
-	if((platform_device_register(&sun4i_device_codec))<0)
-		return err;
+	int ret = 0;
 
-	if ((err = platform_driver_register(&sun4i_codec_driver)) < 0)
-		return err;
+	ret = script_parser_fetch("audio_para","audio_used", &audio_used, sizeof(int));
+	if (ret) {
+        printk("[audio]sun4i_codec_init fetch audio using configuration failed\n");
+    }
+    
+   if (audio_used) {
+		if((platform_device_register(&sun4i_device_codec))<0)
+			return err;
 	
+		if ((err = platform_driver_register(&sun4i_codec_driver)) < 0)
+			return err;
+	}	
 	return 0;
 }
 

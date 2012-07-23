@@ -3,7 +3,7 @@
 *                         			      Linux
 *					           USB Host Controller Driver
 *
-*				        (c) Copyright 2006-2010, All winners Co,Ld.
+*				        (c) Copyright 2006-2012, SoftWinners Co,Ld.
 *							       All Rights Reserved
 *
 * File Name 	: usb_manager.c
@@ -81,6 +81,9 @@ static __u32 thread_stopped_flag = 1;
 static int usb_hardware_scan_thread(void * pArg)
 {
 	struct usb_cfg *cfg = pArg;
+
+    /* delay for udc & hcd ready */
+	msleep(3000);
 
 	while(thread_run_flag){
 		DMSG_DBG_MANAGER("\n\n");

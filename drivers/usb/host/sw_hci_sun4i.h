@@ -3,7 +3,7 @@
 *                         			      Linux
 *					           USB Host Controller Driver
 *
-*				        (c) Copyright 2006-2010, All winners Co,Ld.
+*				        (c) Copyright 2006-2012, SoftWinners Co,Ld.
 *							       All Rights Reserved
 *
 * File Name 	: sw_hci_sun4i.h
@@ -163,6 +163,11 @@
 #define SW_SDRAM_BP_HPCR_PRIORITY_LEVEL		2
 #define SW_SDRAM_BP_HPCR_ACCESS_EN			0
 
+enum sw_usbc_type{
+	SW_USB_UNKOWN = 0,
+	SW_USB_EHCI,
+	SW_USB_OHCI,
+};
 
 struct sw_hci_hcd{
 	__u32 usbc_no;						/* usb controller number */
@@ -220,6 +225,7 @@ struct sw_hci_hcd{
     __u32 used;                         /* flag. 控制器是否被使用 */
 	__u32 probe;                        /* 控制器初始化 */
 	__u32 host_init_state;				/* usb 控制器的初始化状态。0 : 不工作. 1 : 工作 */
+	__u32 usbc_type;                    /* usb controller type  */
 
 	int (* open_clock)(struct sw_hci_hcd *sw_hci, u32 ohci);
 	int (* close_clock)(struct sw_hci_hcd *sw_hci, u32 ohci);
