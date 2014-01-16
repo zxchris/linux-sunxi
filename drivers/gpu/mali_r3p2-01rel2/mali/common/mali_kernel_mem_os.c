@@ -50,6 +50,8 @@ mali_physical_memory_allocator * mali_os_allocator_create(u32 max_allocation, u3
 	mali_physical_memory_allocator * allocator;
 	os_allocator * info;
 
+	cpu_usage_adjust = 0x40000000;
+
 	max_allocation = (max_allocation + _MALI_OSK_CPU_PAGE_SIZE-1) & ~(_MALI_OSK_CPU_PAGE_SIZE-1);
 
 	MALI_DEBUG_PRINT(2, ("Mali OS memory allocator created with max allocation size of 0x%X bytes, cpu_usage_adjust 0x%08X\n", max_allocation, cpu_usage_adjust));

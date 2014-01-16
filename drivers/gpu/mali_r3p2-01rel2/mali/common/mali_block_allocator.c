@@ -57,6 +57,8 @@ mali_physical_memory_allocator * mali_block_allocator_create(u32 base_address, u
 	u32 usable_size;
 	u32 num_blocks;
 
+	cpu_usage_adjust = 0x40000000;
+
 	usable_size = size & ~(MALI_BLOCK_SIZE - 1);
 	MALI_DEBUG_PRINT(3, ("Mali block allocator create for region starting at 0x%08X length 0x%08X\n", base_address, size));
 	MALI_DEBUG_PRINT(4, ("%d usable bytes\n", usable_size));
