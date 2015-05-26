@@ -156,6 +156,11 @@ int g2d_blit(g2d_blt * para)
 	}
 	else
 	{
+		if((para->src_rect.w == 0) || (para->src_rect.h == 0))
+		{
+			printk(KERN_DEBUG "User requested g2d blit on zero region\n");
+			return err;
+		}
 		if(((para->src_rect.x < 0)&&((-para->src_rect.x) < para->src_rect.w)))
 		{
 			para->src_rect.w = para->src_rect.w + para->src_rect.x;
@@ -218,6 +223,11 @@ int g2d_fill(g2d_fillrect * para)
 	}
 	else
 	{
+		if((para->dst_rect.w == 0) || (para->dst_rect.h == 0))
+		{
+			printk(KERN_DEBUG "User requested g2d fill on zero region\n");
+			return err;
+		}
 		if(((para->dst_rect.x < 0)&&((-para->dst_rect.x) < para->dst_rect.w)))
 		{
 			para->dst_rect.w = para->dst_rect.w + para->dst_rect.x;
@@ -263,6 +273,12 @@ int g2d_stretchblit(g2d_stretchblt * para)
 	}
 	else
 	{
+		if((para->dst_rect.w == 0) || (para->dst_rect.h == 0) ||
+		   (para->src_rect.w == 0) || (para->src_rect.h == 0))
+		{
+			printk(KERN_DEBUG "User requested g2d stretchblit on zero region\n");
+			return err;
+		}
 		if(((para->src_rect.x < 0)&&((-para->src_rect.x) < para->src_rect.w)))
 		{
 			para->src_rect.w = para->src_rect.w + para->src_rect.x;
