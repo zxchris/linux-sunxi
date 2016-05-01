@@ -1159,7 +1159,8 @@ static int cgroup_show_options(struct seq_file *seq, struct dentry *dentry)
 	if (test_bit(ROOT_XATTR, &root->flags))
 		seq_puts(seq, ",xattr");
 	if (strlen(root->release_agent_path))
-		seq_printf(seq, ",release_agent=%s", root->release_agent_path);
+		seq_printf(seq, ",release_agent=%s",
+			   root->release_agent_path);
 	if (clone_children(&root->top_cgroup))
 		seq_puts(seq, ",clone_children");
 	if (strlen(root->name))
