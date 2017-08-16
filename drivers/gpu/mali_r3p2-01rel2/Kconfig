@@ -1,0 +1,2 @@
+source "drivers/gpu/mali_r3p2-01rel2/mali/Kconfig"
+source "drivers/gpu/mali_r3p2-01rel2/ump/Kconfig"
