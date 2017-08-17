@@ -1,18 +1,10 @@
-# Configuration for A10
-
-ifdef CONFIG_ARCH_SUN7I
-CONFIG:=ca7-virtex820-m400-2
-MALI_PLATFORM_FILE:=platform/${CONFIG}/mali_platform.c
-export MALI_PLATFORM_FILE
-else
 CONFIG:=ca8-virtex820-m400-1
-endif
 
 USING_MMU:=1
 USING_UMP:=1
 USING_PMM:=1
 BUILD:=release
-TARGET_PLATFORM:=mali400-pmu
+TARGET_PLATFORM:=ca8-virtex820-m400-1
 ifneq ($(CONFIG_TRACEPOINTS),y)
 USING_PROFILING:=0
 export USING_PROFILING
