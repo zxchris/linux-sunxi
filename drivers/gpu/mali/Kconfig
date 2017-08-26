@@ -7,5 +7,5 @@ config MALI
 	help
 	  This enables the generation of mali.ko and ump.ko.
 
-source "drivers/gpu/mali/mali/Kconfig"
-source "drivers/gpu/mali/ump/Kconfig"
+source "drivers/gpu/mali_r3p2-01rel2/mali/Kconfig"
+source "drivers/gpu/mali_r3p2-01rel2/ump/Kconfig"
