@@ -1,2 +1,11 @@
+config MALI
+	tristate "ARM Mali GPU modules"
+	depends on ARM && m
+        select UMP
+        select MALI400
+	default n
+	help
+	  This enables the generation of mali.ko and ump.ko, and allows FB/UMP integration (see framebuffer).
+
 source "drivers/gpu/mali_r3p2-01rel2/mali/Kconfig"
 source "drivers/gpu/mali_r3p2-01rel2/ump/Kconfig"
