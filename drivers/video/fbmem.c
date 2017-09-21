@@ -1080,6 +1080,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 
 	switch (cmd) {
 	case FBIOGET_VSCREENINFO:
+//printk(KERN_INFO "fb: FBIOGET_VSCREENINFO");
 		if (!lock_fb_info(info))
 			return -ENODEV;
 		var = info->var;
@@ -1092,6 +1093,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			return -EFAULT;
 		if (!lock_fb_info(info))
 			return -ENODEV;
+//printk(KERN_INFO "fb: FBIPUTT_VSCREENINFO. yoffset: %d", var.yoffset );
 		console_lock();
 		info->flags |= FBINFO_MISC_USEREVENT;
 		ret = fb_set_var(info, &var);
@@ -1124,6 +1126,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		ret = fb_cmap_to_user(&cmap_from, &cmap);
 		break;
 	case FBIOPAN_DISPLAY:
+//printk(KERN_INFO "fb: FBIOPAN_DISPLAY");
 		if (copy_from_user(&var, argp, sizeof(var)))
 			return -EFAULT;
 		if (!lock_fb_info(info))
@@ -1134,6 +1137,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		unlock_fb_info(info);
 		if (ret == 0 && copy_to_user(argp, &var, sizeof(var)))
 			return -EFAULT;
+//printk(KERN_INFO "fb: FBIOPAN_DISPLAY done. yoffset: %d", var.yoffset );
 		break;
 	case FBIO_CURSOR:
 		ret = -EINVAL;
