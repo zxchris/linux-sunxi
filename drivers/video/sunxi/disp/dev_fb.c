@@ -1015,7 +1015,7 @@ static int Fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 
 	//__inf("Fb_pan_display\n");
     
-	Fb_wait_for_vsync(info); // Wait for VSync *before* flipping buffers
+	//Fb_wait_for_vsync(info); // Wait for VSync *before* flipping buffers
 
 	for (sel = 0; sel < 2; sel++) {
 		if (((sel == 0) &&
@@ -1055,9 +1055,10 @@ static int Fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 			} else {
 				layer_para.src_win.height = var->yres / buffer_num;
 				layer_para.src_win.x = var->xoffset;
+				layer_para.src_win.y = var->yoffset + y_offset;
                 // Mali seems to be updateing the front buffer, so let's flip that sense..
                 // YOffset = 0 -> win.y = height. YOffset = height -> win.y = 0
-				layer_para.src_win.y = layer_para.src_win.height - var->yoffset + y_offset;
+				//layer_para.src_win.y = layer_para.src_win.height - var->yoffset + y_offset;
 				layer_para.src_win.width = var->xres;
 
 				layer_para.scn_win.width = var->xres;
@@ -1073,6 +1074,8 @@ static int Fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 			}
 		}
 	}
+
+	Fb_wait_for_vsync(info); // Wait for VSync *before* flipping buffers
 
 	return 0;
 }
