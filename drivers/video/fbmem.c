@@ -15,6 +15,7 @@
 
 #include <linux/compat.h>
 #include <linux/types.h>
+#include <linux/dma-buf.h>
 #include <linux/errno.h>
 #include <linux/kernel.h>
 #include <linux/major.h>
@@ -1065,6 +1066,23 @@ fb_blank(struct fb_info *info, int blank)
  	return ret;
 }
 
+#ifdef CONFIG_DMA_SHARED_BUFFER
+int
+fb_get_dmabuf(struct fb_info *info, int flags)
+{
+	struct dma_buf *dmabuf;
+
+	if (info->fbops->fb_dmabuf_export == NULL)
+		return -ENOTTY;
+
+	dmabuf = info->fbops->fb_dmabuf_export(info);
+	if (IS_ERR(dmabuf))
+		return PTR_ERR(dmabuf);
+
+	return dma_buf_fd(dmabuf, flags);
+}
+#endif
+
 static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			unsigned long arg)
 {
@@ -1075,11 +1093,13 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 	struct fb_cmap cmap_from;
 	struct fb_cmap_user cmap;
 	struct fb_event event;
+	struct fb_dmabuf_export dmaexp;
 	void __user *argp = (void __user *)arg;
 	long ret = 0;
 
 	switch (cmd) {
 	case FBIOGET_VSCREENINFO:
+//printk(KERN_INFO "fb: FBIOGET_VSCREENINFO");
 		if (!lock_fb_info(info))
 			return -ENODEV;
 		var = info->var;
@@ -1092,6 +1112,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			return -EFAULT;
 		if (!lock_fb_info(info))
 			return -ENODEV;
+//printk(KERN_INFO "fb: FBIPUTT_VSCREENINFO. yoffset: %d", var.yoffset );
 		console_lock();
 		info->flags |= FBINFO_MISC_USEREVENT;
 		ret = fb_set_var(info, &var);
@@ -1124,6 +1145,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		ret = fb_cmap_to_user(&cmap_from, &cmap);
 		break;
 	case FBIOPAN_DISPLAY:
+//printk(KERN_INFO "fb: FBIOPAN_DISPLAY");
 		if (copy_from_user(&var, argp, sizeof(var)))
 			return -EFAULT;
 		if (!lock_fb_info(info))
@@ -1134,6 +1156,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		unlock_fb_info(info);
 		if (ret == 0 && copy_to_user(argp, &var, sizeof(var)))
 			return -EFAULT;
+//printk(KERN_INFO "fb: FBIOPAN_DISPLAY done. yoffset: %d", var.yoffset );
 		break;
 	case FBIO_CURSOR:
 		ret = -EINVAL;
@@ -1184,6 +1207,23 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		console_unlock();
 		unlock_fb_info(info);
 		break;
+#ifdef CONFIG_DMA_SHARED_BUFFER
+	case FBIOGET_DMABUF:
+		if (copy_from_user(&dmaexp, argp, sizeof(dmaexp)))
+			return -EFAULT;
+
+		if (!lock_fb_info(info))
+			return -ENODEV;
+		dmaexp.fd = fb_get_dmabuf(info, dmaexp.flags);
+		unlock_fb_info(info);
+
+		if (dmaexp.fd < 0)
+			return dmaexp.fd;
+
+		ret = copy_to_user(argp, &dmaexp, sizeof(dmaexp))
+		    ? -EFAULT : 0;
+		break;
+#endif
 	default:
 		if (!lock_fb_info(info))
 			return -ENODEV;

@@ -1054,8 +1054,7 @@ static int Fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 				layer_para.src_win.x = var->xoffset;
 				layer_para.src_win.y = var->yoffset + y_offset;
 				layer_para.src_win.width = var->xres;
-				layer_para.src_win.height =
-				    var->yres / buffer_num;
+				layer_para.src_win.height = var->yres / buffer_num;
 
 				layer_para.scn_win.width = var->xres;
 				layer_para.scn_win.height =
@@ -1071,7 +1070,7 @@ static int Fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 		}
 	}
 
-	Fb_wait_for_vsync(info);
+	// Fb_wait_for_vsync(info);
 
 	return 0;
 }

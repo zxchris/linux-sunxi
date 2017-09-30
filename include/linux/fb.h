@@ -39,6 +39,7 @@
 #define FBIOPUT_MODEINFO        0x4617
 #define FBIOGET_DISPINFO        0x4618
 #define FBIO_WAITFORVSYNC	_IOW('F', 0x20, __u32)
+#define FBIOGET_DMABUF		_IOR('F', 0x21, struct fb_dmabuf_export)
 
 #define FB_TYPE_PACKED_PIXELS		0	/* Packed Pixels	*/
 #define FB_TYPE_PLANES			1	/* Non interleaved planes */
@@ -403,6 +404,11 @@ struct fb_cursor {
 #define FB_BACKLIGHT_MAX	0xFF
 #endif
 
+struct fb_dmabuf_export {
+	__u32 fd;
+	__u32 flags;
+};
+
 #ifdef __KERNEL__
 
 #include <linux/fs.h>
@@ -418,6 +424,7 @@ struct vm_area_struct;
 struct fb_info;
 struct device;
 struct file;
+struct dma_buf;
 
 /* Definitions below are used in the parsed monitor specs */
 #define FB_DPMS_ACTIVE_OFF	1
@@ -696,6 +703,11 @@ struct fb_ops {
 	/* called at KDB enter and leave time to prepare the console */
 	int (*fb_debug_enter)(struct fb_info *info);
 	int (*fb_debug_leave)(struct fb_info *info);
+
+#ifdef CONFIG_DMA_SHARED_BUFFER
+	/* Export the frame buffer as a dmabuf object */
+	struct dma_buf *(*fb_dmabuf_export)(struct fb_info *info);
+#endif
 };
 
 #ifdef CONFIG_FB_TILEBLITTING
