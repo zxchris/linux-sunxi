@@ -559,18 +559,23 @@ config SUNXI_NAND
 	depends on BLOCK
 	depends on ARCH_SUN4I || ARCH_SUN5I || ARCH_SUN7I
 	select SUNXI_NAND_PARTITION
-	tristate "SUNXI Nandflash Driver"
-
-config SUNXI_NAND_COMPAT_DEV
-	depends on SUNXI_NAND
-	bool "Create old nand device names (nanda-nandz)"
-	default y
+	tristate "SUNXI v2.09 Nandflash Driver"
 	---help---
-	  This is the traditional device naming on sunxi platform.
-	  If unsure, say Y.
+	  Build v2.09 SUNXI NAND flash driver. For sun7i platforms (A20)
+      this has been superceeded by the SUN7I_NAND driver (v2.13).
 
-config SUNXI_NAND_TEST
-	depends on SUNXI_NAND
-	tristate "SUNXI Nandflash Test Driver "
+#config SUNXI_NAND_COMPAT_DEV
+#	depends on SUNXI_NAND
+#	bool "Create old nand device names (nanda-nandz)"
+#	default y
+#	---help---
+#	  This is the traditional device naming on sunxi platform.
+#	  If unsure, say Y.
+
+#config SUNXI_NAND_TEST
+#	depends on SUNXI_NAND
+#	tristate "SUNXI Nandflash Test Driver "
+
+source "drivers/block/nand_sun7i/Kconfig"
 
 endif # BLK_DEV
