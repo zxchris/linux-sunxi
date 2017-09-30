@@ -1,0 +1,8 @@
+config SUN7I_NAND
+	depends on BLOCK
+	depends on ARCH_SUN7I
+	select SUNXI_NAND_PARTITION
+	tristate "SUN7I Nandflash Driver"
+	---help---
+	  Build AllWinner SUNXI sun7i NAND driver version v2.13
+      from release https://github.com/allwinner-zh/linux-3.4-sunxi/commits/master
