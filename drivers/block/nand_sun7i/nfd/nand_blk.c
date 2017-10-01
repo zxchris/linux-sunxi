@@ -34,6 +34,7 @@
 #include "nand_blk.h"
 #include "../nandtest/nand_test.h"
 #include <mach/sunxi_sys_config.h>
+#include <mach/sys_config.h>
 #include <linux/pm.h>
 
 // Import from AW to linux-sunxi fixes
@@ -1152,24 +1153,24 @@ static int  init_blklayer(void)
 	    printk("nand interrupt register ok\n");
 	}
 #endif
-	//modify ValidBlkRatio
-	script_ret = script_get_item("nand_para","good_block_ratio", &nand_good_block_ratio);
-  if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
-  {
-    	printk("nand init fetch nand_good_block_ratio failed\n");
-  }
-  else
-  {
-        if(nand_good_block_ratio.val <= 0)
-        {
-            printk("[NAND] use nand_good_block_ratio from default parameter\n");
-        }
-        else
-        {
-            printk("[NAND] get nand_good_block_ratio from script: %d \n",nand_good_block_ratio.val);
-            NAND_SetValidBlkRatio(nand_good_block_ratio.val);
-        }
-	}
+    //modify ValidBlkRatio
+//    script_ret = script_get_item("nand_para","good_block_ratio", &nand_good_block_ratio);
+//    if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
+//    {
+//        printk("nand init fetch nand_good_block_ratio failed\n");
+//    }
+//    else
+//    {
+//        if(nand_good_block_ratio.val <= 0)
+//        {
+//            printk("[NAND] use nand_good_block_ratio from default parameter\n");
+//        }
+//        else
+//        {
+//            printk("[NAND] get nand_good_block_ratio from script: %d \n",nand_good_block_ratio.val);
+//            NAND_SetValidBlkRatio(nand_good_block_ratio.val);
+//        }
+//    }
 
 	ret = PHY_ChangeMode(1);
 	if (ret < 0)
@@ -1413,24 +1414,37 @@ static struct platform_driver nand_driver = {
 int nand_init(void)
 {
 	s32 ret;
-//	int nand_used = 0;
+    int nand_used = 0;
 
-	script_item_value_type_e script_ret;
-	script_item_u nand_used;
-
-    printk("%s,line:%d\n", __func__, __LINE__);
-    script_ret = script_get_item("nand_para","nand_used", &nand_used);
-    if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
+    ret = script_parser_fetch("nand_para","nand_used", &nand_used, sizeof(int));
+    if (ret)
     {
-    	printk("nand init fetch emac using configuration failed\n");
+        printk("nand init fetch emac using configuration failed\n");
 
     }
 
-    if(nand_used.val == 0)
+    if(nand_used == 0)
     {
         printk("nand driver is disabled \n");
         return 0;
     }
+
+	//script_item_value_type_e script_ret;
+	//script_item_u nand_used;
+
+    //printk("%s,line:%d\n", __func__, __LINE__);
+    //script_ret = script_get_item("nand_para","nand_used", &nand_used);
+    //if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
+    //{
+    //	printk("nand init fetch emac using configuration failed\n");
+
+    //}
+
+    //if(nand_used.val == 0)
+    //{
+    //    printk("nand driver is disabled \n");
+    //    return 0;
+    //}
 
 
 	printk("[NAND]nand driver, init.\n");
@@ -1454,24 +1468,37 @@ int nand_init(void)
 
 void nand_exit(void)
 {
- //   s32 ret;
-//	int nand_used = 0;
-	script_item_value_type_e script_ret;
-	script_item_u nand_used;
+    s32 ret;
+    int nand_used = 0;
 
-
-    script_ret = script_get_item("nand_para","nand_used", &nand_used);
-    if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
+    ret = script_parser_fetch("nand_para","nand_used", &nand_used, sizeof(int));
+    if (ret)
     {
-    	printk("nand init fetch emac using configuration failed\n");
+        printk("nand init fetch emac using configuration failed\n");
 
     }
 
-    if(nand_used.val == 0)
+    if(nand_used == 0)
     {
         printk("nand driver is disabled \n");
         return ;
     }
+
+    //script_item_value_type_e script_ret;
+	//script_item_u nand_used;
+
+    //script_ret = script_get_item("nand_para","nand_used", &nand_used);
+    //if (script_ret!=SCIRPT_ITEM_VALUE_TYPE_INT)
+    //{
+    //	printk("nand init fetch emac using configuration failed\n");
+
+    //}
+
+    //if(nand_used.val == 0)
+    //{
+    //    printk("nand driver is disabled \n");
+    //    return ;
+    //}
 
 	printk("[NAND]nand driver : bye bye\n");
 	platform_driver_unregister(&nand_driver);

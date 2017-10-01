@@ -45,7 +45,6 @@ dma_hdl_t dma_hdle = (dma_hdl_t)NULL;
 int seq=0;
 u32 nand_handle=0;
 dma_cb_t done_cb;
-dma_config_t dma_config;
 
 static int nandrb_ready_flag = 1;
 
