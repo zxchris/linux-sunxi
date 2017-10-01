@@ -45,7 +45,7 @@ extern void NAND_ClkDisable(void);
 extern int NAND_SetClk(unsigned int nand_clk);
 extern int NAND_GetClk(void);
 
-extern void* NAND_RequestDMA(void);
+extern int NAND_RequestDMA(void);
 extern int NAND_ReleaseDMA(void);
 extern void NAND_DMAConfigStart(int rw, unsigned int buff_addr, int len);
 extern int NAND_QueryDmaStat(void);
@@ -61,6 +61,8 @@ extern void NAND_RbInterrupt(void);
 
 extern int NAND_get_storagetype(void);
 
+void NAND_Memset(void* pAddr, unsigned char value, unsigned int len);
+void NAND_Memcpy(void* pAddr_dst, void* pAddr_src, unsigned int len);
 
 extern void* NAND_Malloc(unsigned int Size);
 extern void NAND_Free(void *pAddr, unsigned int Size);

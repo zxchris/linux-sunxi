@@ -784,7 +784,7 @@ __s32 NFC_Init(NFC_INIT_INFO *nand_info )
 	ret = NFC_ChangMode( nand_info);
 
 	/*request special dma*/
-	if (NULL==NAND_RequestDMA())
+	if (NAND_RequestDMA() < 0 )
 	{
 	    PRINT("NAND_RequestDMA  fail\n");
 	    return -1;

@@ -1,1 +1,1 @@
-../../../plat-sunxi/sys_config.h
+../../../plat-sunxi/include/plat/sys_config.h

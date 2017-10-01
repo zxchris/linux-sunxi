@@ -33,7 +33,22 @@
 #include <linux/pm.h>
 #include "nand_blk.h"
 #include "../nandtest/nand_test.h"
-#include <mach/sys_config.h>
+#include <mach/sunxi_sys_config.h>
+#include <linux/pm.h>
+
+// Import from AW to linux-sunxi fixes
+typedef enum{
+    NON_STANDBY = 0,
+    NORMAL_STANDBY = 1,
+    SUPER_STANDBY = 3
+}standby_type_e;
+
+standby_type_e standby_type = NORMAL_STANDBY;
+
+//#define SW_INT_IRQNO_NAND AW_IRQ_NAND // Removed as not required
+
+// -----------------------------------
+
 
 
 extern __u32 nand_current_dev_num;
@@ -1027,9 +1042,9 @@ static int nand_flush(struct nand_blk_dev *dev)
 
 static int nand_logrelease(struct nand_blk_dev *dev)
 {
+    #ifdef NAND_LOG_AUTO_MERGE
     __s32 log_cnt =-1;
 
-    #ifdef NAND_LOG_AUTO_MERGE
 	if (0 == down_trylock(&mytr.nand_ops_mutex))
 	{
 		IS_IDLE = 0;
@@ -1099,8 +1114,6 @@ int cal_partoff_within_disk(char *name,struct inode *i)
 		return 0;
 	return ( gd->part_tbl->part[ index - 1]->start_sect);
 }
-
-#define SW_INT_IRQNO_NAND AW_IRQ_NAND
 
 #ifndef CONFIG_SUN7I_NANDFLASH_TEST
 static int  init_blklayer(void)
