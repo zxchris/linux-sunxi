@@ -5,4 +5,4 @@ config SUN7I_NAND
 	tristate "SUN7I v2.13 Nandflash Driver"
 	---help---
 	  Build AllWinner SUNXI sun7i NAND driver version v2.13
-      from release https://github.com/allwinner-zh/linux-3.4-sunxi/commits/master
+	  from release https://github.com/allwinner-zh/linux-3.4-sunxi/commits/master
