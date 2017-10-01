@@ -562,7 +562,7 @@ config SUNXI_NAND
 	tristate "SUNXI v2.09 Nandflash Driver"
 	---help---
 	  Build v2.09 SUNXI NAND flash driver. For sun7i platforms (A20)
-      this has been superceeded by the SUN7I_NAND driver (v2.13).
+	  this has been superceeded by the SUN7I_NAND driver (v2.13).
 
 #config SUNXI_NAND_COMPAT_DEV
 #	depends on SUNXI_NAND
