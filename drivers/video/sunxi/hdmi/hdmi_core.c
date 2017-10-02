@@ -75,6 +75,20 @@ static struct platform_device audio_devs[] = {
 	{ .name = "sunxi-hdmiaudio-pcm-audio" },
 };
 
+void Hdmi_force_audio_register()
+{
+    int rc,i;
+    if (audio_enable && !audio_devs_registered) {
+        for (i = 0; i < ARRAY_SIZE(audio_devs); i++) {
+            rc = platform_device_register(audio_devs + i);
+            if (rc < 0)
+                pr_warn("Failed to register %s (%d)\n",
+                        audio_devs[i].name, rc);
+        }
+        audio_devs_registered = 1;
+    }
+}
+
 void hdmi_delay_ms(__u32 t)
 {
 	__u32 timeout = t * HZ / 1000;
