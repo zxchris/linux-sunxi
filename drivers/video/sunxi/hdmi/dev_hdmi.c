@@ -140,6 +140,8 @@ static const struct file_operations hdmi_fops = {
 	.mmap = hdmi_mmap,
 };
 
+extern void Hdmi_force_audio_device();
+
 static int __init
 hdmi_module_init(void)
 {
@@ -167,6 +169,8 @@ hdmi_module_init(void)
 
 	if (ret == 0)
 		ret = platform_driver_register(&hdmi_driver);
+
+    Hdmi_force_audio_device();
 
 	return ret;
 }

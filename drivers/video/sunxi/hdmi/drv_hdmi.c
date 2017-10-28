@@ -299,6 +299,21 @@ Hdmi_run_thread(void *parg)
 	return 0;
 }
 
+extern void Hdmi_force_audio_register();
+
+void Hdmi_force_audio_device()
+{
+    hdmi_audio_t audio_para;
+
+    audio_para.ch0_en = 2;
+    audio_para.sample_rate = 44100;
+    audio_para.sample_bit  = 16;
+    Hdmi_Set_Audio_Para(&audio_para);
+
+    Hdmi_Audio_Enable(0, 2);
+    Hdmi_force_audio_register();
+}
+
 __s32 Hdmi_init(struct platform_device *dev)
 {
 	__audio_hdmi_func audio_func;
@@ -321,6 +336,7 @@ __s32 Hdmi_init(struct platform_device *dev)
 
 		audio_para.ch0_en = 1;
 		audio_para.sample_rate = 44100;
+		audio_para.sample_bit  = 16;
 		Hdmi_hal_set_audio_para(&audio_para);
 
 		Hdmi_hal_audio_enable(0, 1);
