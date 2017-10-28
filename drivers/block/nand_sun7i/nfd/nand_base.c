@@ -1,6 +1,17 @@
 #include "nand_blk.h"
 #include "nand_dev.h"
 
+// Import from AW to linux-sunxi fixes
+typedef enum{
+    NON_STANDBY = 0,
+    NORMAL_STANDBY = 1,
+    SUPER_STANDBY = 3
+}standby_type_e;
+
+standby_type_e standby_type = NORMAL_STANDBY;
+
+#define AW_IRQ_NAND SW_INT_IRQNO_NAND 
+
 /*****************************************************************************/
 
 extern struct nand_blk_ops mytr;
@@ -228,7 +239,7 @@ extern int test_mbr(uchar* data);
 int __init nand_init(void)
 {
     int ret;
-    script_item_u   nand0_used_flag;
+    //script_item_u   nand0_used_flag;
     script_item_u   nand_cache_level;
     script_item_value_type_e  type;
     char * dev_name = "nand_dev";
@@ -240,20 +251,43 @@ int __init nand_init(void)
 
 
     /* 获取card_line值 */
-    type = script_get_item("nand_para", "nand_used", &nand0_used_flag);
-    if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    //type = script_get_item("nand_para", "nand_used", &nand0_used_flag);
+    //if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    //{
+    //    nand_dbg_err("nand type err! %d",type);
+    //}
+    //nand_dbg_err("[NAND]nand init start, nand_used_flag is %d\n", nand0_used_flag.val);
+    
+    int nand_used;
+    ret = script_parser_fetch("nand_para","nand_used", &nand_used, sizeof(int));
+    if (ret)
     {
-        nand_dbg_err("nand type err! %d",type);
+        printk("nand init fetch emac using configuration failed\n");
     }
-    nand_dbg_err("[NAND]nand init start, nand_used_flag is %d\n", nand0_used_flag.val);
+
+    if(nand_used == 0)
+    {
+        printk("nand driver is disabled \n");
+        return 0;
+    }
+
 
     nand_cache_level.val = 0;
-    type = script_get_item("nand_para", "nand_cache_level", &nand_cache_level);
-    if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    //type = script_get_item("nand_para", "nand_cache_level", &nand_cache_level);
+    //if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    //{
+    //    nand_dbg_err("nand_cache_level err! %d",type);
+    //    nand_cache_level.val = 0;
+    //}
+
+    ret = script_parser_fetch("nand_para","nand_cache_level", &(nand_cache_level.val), sizeof(int));
+    if (ret)
     {
         nand_dbg_err("nand_cache_level err! %d",type);
         nand_cache_level.val = 0;
     }
+
+
 
 #ifdef __LINUX_NAND_SUPPORT_INT__
     //nand_dbg_err("[NAND] nand driver version: 0x%x 0x%x, support int! \n", NAND_VERSION_0,NAND_VERSION_1);
@@ -273,7 +307,8 @@ int __init nand_init(void)
     }
 #endif
 
-    if(nand0_used_flag.val == 0)
+    //if(nand0_used_flag.val == 0)
+    if(nand_used == 0)
     {
         nand_dbg_err("nand driver is disabled \n");
         return 0;
@@ -339,16 +374,20 @@ int __init nand_init(void)
 *****************************************************************************/
 void __exit nand_exit(void)
 {
-    script_item_u   nand0_used_flag;
-    script_item_value_type_e  type;
+    //script_item_u   nand0_used_flag;
+    //script_item_value_type_e  type;
 
     /* 获取card_line值 */
-    type = script_get_item("nand0_para", "nand0_used", &nand0_used_flag);
-    if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    int nand_used;
+    int ret = script_parser_fetch("nand_para","nand_used", &nand_used, sizeof(int));
+    //type = script_get_item("nand0_para", "nand0_used", &nand0_used_flag);
+    //if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+    //nand_dbg_err("nand type err!");
+    //nand_dbg_err("nand0_used_flag is %d\n", nand0_used_flag.val);
     nand_dbg_err("nand type err!");
-    nand_dbg_err("nand0_used_flag is %d\n", nand0_used_flag.val);
+    nand_dbg_err("nand_used flag is %d\n", nand_used);
 
-    if(nand0_used_flag.val == 0)
+    if(nand_used == 0)
     {
         nand_dbg_err("nand driver is disabled \n");
     }

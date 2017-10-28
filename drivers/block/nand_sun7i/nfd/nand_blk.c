@@ -803,15 +803,15 @@ int  init_blklayer(void)
     script_item_value_type_e  type;
 
 
-    /* 获取card_line值 */
-    type = script_get_item("nand0_para", "good_block_ratio", &good_block_ratio_flag);
-
-    if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
-        nand_dbg_err("nand type err!\n");
-    else
-    {
-
-    }
+//    /* 获取card_line值 */
+//    type = script_get_item("nand0_para", "good_block_ratio", &good_block_ratio_flag);
+//
+//    if(SCIRPT_ITEM_VALUE_TYPE_INT != type)
+//        nand_dbg_err("nand type err!\n");
+//    else
+//    {
+//
+//    }
 
     return nand_blk_register(&mytr);
 }

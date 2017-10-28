@@ -31,6 +31,7 @@
 #include "nand_type.h"
 #include "nand_lib.h"
 #include <mach/sys_config.h>
+#include <mach/sunxi_sys_config.h>
 #include <linux/scatterlist.h>
 #include <linux/vmalloc.h>
 #include <linux/freezer.h>
