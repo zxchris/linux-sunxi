@@ -1,11 +1,17 @@
 /*
- * Copyright (C) 2013 Allwinnertech, kevin.z.m <kevin@allwinnertech.com>
+ * nand_interface.c
+ * (C) Copyright 2007-2011
+ * Reuuimlla Technology Co., Ltd. <www.reuuimllatech.com>
+ * huangxin <huangxin@Reuuimllatech.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * some simple description for this code
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
  */
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include "include/nand_include.h"
